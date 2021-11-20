@@ -28,4 +28,5 @@ class PostSerializer(ModelSerializer):
             'created_at',
             'update_at',
             'is_public',
+            'ip',
         ]

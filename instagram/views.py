@@ -2,13 +2,16 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework.decorators import api_view, action
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from instagram.models import Post
+from instagram.permission import IsAuthorOrReadonly
 from instagram.serializers import PostSerializer
 
 
@@ -45,6 +48,20 @@ class PostViewSet(ModelViewSet):
     # 아래 두개의 뷰를 queryset , serializer_class 두개의 정보만의 다 지원함!
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    # 아래 두가지로 filter할 수 있음!
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['^message']
+    Ordering_fields = ['id']
+
+    # 해당 뷰셋에 접근하려면 무조건 로그인되있어야만 호출 가능!
+    # 인증이 됨을 보장받을 수 있음
+    permission_classes = [IsAuthenticated, IsAuthorOrReadonly]
+
+    def perform_create(self, serializer):
+        author = self.request.user
+        ip = self.request.META['REMOTE_ADDR']
+        serializer.save(author=author, ip=ip)
 
     @action(detail=False, methods=['GET'])
     def public(self, request):
