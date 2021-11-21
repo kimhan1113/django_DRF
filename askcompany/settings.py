@@ -48,7 +48,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'instagram',
+    'accounts',
+
 ]
 
 MIDDLEWARE = [
@@ -139,9 +142,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 디폴트 전역 설정
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+      'rest_framework.authentication.SessionAuthentication',
+      # 'rest_framework.authentication.BasicAuthentication',
+      'rest_framework.authentication.TokenAuthentication',
+    ],
     'PAGE_SIZE': 5,
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_PERMISSION_CLASSES': [
       'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+
+    'DEFAULT_THROTTLE_RATES':{
+        # 하루에 최대 3번 요청가능!
+      'user': '3/day',
+    },
 }
